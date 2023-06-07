@@ -26,7 +26,8 @@ import { IBazelTreeItem } from "./bazel_tree_item";
 
 /** A tree item representing a build package. */
 export class BazelPackageTreeItem
-  implements IBazelCommandAdapter, IBazelTreeItem {
+  implements IBazelCommandAdapter, IBazelTreeItem
+{
   /**
    * The array of subpackages that should be shown directly under this package
    * item.
@@ -53,6 +54,7 @@ export class BazelPackageTreeItem
   }
 
   public async getChildren(): Promise<IBazelTreeItem[]> {
+    // TODO: this is how we get the list of targets. use it in testing_provider.ts
     const queryResult = await new BazelQuery(
       getDefaultBazelExecutablePath(),
       this.workspaceInfo.bazelWorkspacePath,

@@ -31,7 +31,7 @@ export interface IBazelTreeItem {
   mightHaveChildren(): boolean;
 
   /** Returns a promise for the children of the tree item. */
-  getChildren(): Thenable<IBazelTreeItem[]>;
+  getChildren(): Thenable<IBazelTreeItem[]>; // TODO: maybe we can get the list from here
 
   /** Returns the text label of the tree item. */
   getLabel(): string;

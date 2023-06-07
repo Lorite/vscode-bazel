@@ -71,6 +71,7 @@ export function getBazelRuleIcon(
     } else if (ruleClass.endsWith("_library")) {
       iconName = "library";
     } else if (ruleClass.endsWith("_test")) {
+      // TODO: list the actual bazel tests based on similar logic in bazel_testing_provider.ts
       iconName = "test";
     }
   }

@@ -22,13 +22,13 @@ import { BazelWorkspaceFolderTreeItem } from "./bazel_workspace_folder_tree_item
  * interface.
  */
 export class BazelWorkspaceTreeProvider
-  implements vscode.TreeDataProvider<IBazelTreeItem> {
+  implements vscode.TreeDataProvider<IBazelTreeItem>
+{
   public onDidChangeTreeData: vscode.Event<IBazelTreeItem | void>;
 
   /** Fired when BUILD files change in the workspace. */
-  private onDidChangeTreeDataEmitter = new vscode.EventEmitter<
-    IBazelTreeItem | void
-  >();
+  private onDidChangeTreeDataEmitter =
+    new vscode.EventEmitter<IBazelTreeItem | void>();
 
   /** The cached toplevel items. */
   private workspaceFolderTreeItems: BazelWorkspaceFolderTreeItem[] | undefined;
@@ -69,6 +69,7 @@ export class BazelWorkspaceTreeProvider
   }
 
   public getChildren(element?: IBazelTreeItem): Thenable<IBazelTreeItem[]> {
+    // TODO: or here
     // If we're given an element, we're not asking for the top-level elements,
     // so just delegate to that element to get its children.
     if (element) {
@@ -133,18 +134,15 @@ export class BazelWorkspaceTreeProvider
   /** Refresh the cached BazelWorkspaceFolderTreeItems. */
   private updateWorkspaceFolderTreeItems() {
     if (vscode.workspace.workspaceFolders) {
-      this.workspaceFolderTreeItems =
-        vscode.workspace.workspaceFolders
-          .map((folder) => {
-            const workspaceInfo = BazelWorkspaceInfo.fromWorkspaceFolder(
-              folder,
-            );
-            if (workspaceInfo) {
-              return new BazelWorkspaceFolderTreeItem(workspaceInfo);
-            }
-            return undefined;
-          })
-          .filter((folder) => folder !== undefined);
+      this.workspaceFolderTreeItems = vscode.workspace.workspaceFolders
+        .map((folder) => {
+          const workspaceInfo = BazelWorkspaceInfo.fromWorkspaceFolder(folder);
+          if (workspaceInfo) {
+            return new BazelWorkspaceFolderTreeItem(workspaceInfo);
+          }
+          return undefined;
+        })
+        .filter((folder) => folder !== undefined);
     } else {
       this.workspaceFolderTreeItems = [];
     }
@@ -152,7 +150,9 @@ export class BazelWorkspaceTreeProvider
     // All the UI to update based on having items.
     const haveBazelWorkspace = this.workspaceFolderTreeItems.length !== 0;
     vscode.commands.executeCommand(
-      "setContext", "vscodeBazelHaveBazelWorkspace", haveBazelWorkspace,
+      "setContext",
+      "vscodeBazelHaveBazelWorkspace",
+      haveBazelWorkspace,
     );
   }
 }
