@@ -428,6 +428,14 @@
                     "name": "Bazel Build Targets",
                     "when": "vscodeBazelHaveBazelWorkspace"
                 }
+            ],
+             "test": [
+                {
+                    "id": "bazelTestExplorer",
+                    "name": "Bazel Tests",
+                    "when": "vscodeBazelHaveBazelWorkspace"
+
+                }
             ]
         }
     },

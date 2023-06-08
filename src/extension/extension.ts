@@ -53,7 +53,10 @@ export function activate(context: vscode.ExtensionContext) {
   const codeLensProvider = new BazelBuildCodeLensProvider(context);
   const buildifierDiagnostics = new BuildifierDiagnosticsManager();
   const completionItemProvider = new BazelCompletionItemProvider();
-  const bazelTestingProvider = new BazelTestingProvider();
+  const bazelTestingProvider = new BazelTestingProvider(
+    context,
+    workspaceTreeProvider,
+  );
 
   // tslint:disable-next-line:no-floating-promises
   completionItemProvider.refresh();
@@ -114,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
       ),
     ),
     vscode.commands.registerCommand("bazel.lookForTests", () => {
-      bazelTestingProvider.activate(context);
+      bazelTestingProvider.activate();
     }),
     // CodeLens provider for BUILD files
     vscode.languages.registerCodeLensProvider(

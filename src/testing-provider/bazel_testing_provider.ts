@@ -6,14 +6,30 @@ import {
   testData,
   TestFile,
 } from "./testTree";
+import { BazelWorkspaceTreeProvider } from "../workspace-tree";
 
 export class BazelTestingProvider {
-  public async activate(context: vscode.ExtensionContext) {
-    const ctrl = vscode.tests.createTestController(
-      "bazelTestingController",
+  private context: vscode.ExtensionContext;
+  private workspaceTree: BazelWorkspaceTreeProvider;
+  private ctrl: vscode.TestController;
+
+  constructor(
+    private context_: vscode.ExtensionContext,
+    private workspaceTree_: BazelWorkspaceTreeProvider,
+  ) {
+    this.context = context_;
+    this.workspaceTree = workspaceTree_;
+    this.ctrl = vscode.tests.createTestController(
+      "bazelTestExplorer",
       "Bazel Tests",
     );
-    context.subscriptions.push(ctrl);
+    this.context.subscriptions.push(this.ctrl);
+  }
+
+  public async activate() {
+    this.workspaceTree.getChildrenTests().then((tests) => {
+      console.log("tests", tests);
+    });
 
     const fileChangedEmitter = new vscode.EventEmitter<vscode.Uri>();
     const runHandler = (
@@ -27,7 +43,7 @@ export class BazelTestingProvider {
       const l = fileChangedEmitter.event((uri) =>
         startTestRun(
           new vscode.TestRunRequest2(
-            [this.getOrCreateFile(ctrl, uri).file],
+            [this.getOrCreateFile(this.ctrl, uri).file],
             undefined,
             request.profile,
             true,
@@ -39,7 +55,7 @@ export class BazelTestingProvider {
 
     const startTestRun = (request: vscode.TestRunRequest) => {
       const queue: { test: vscode.TestItem; data: TestCase }[] = [];
-      const run = ctrl.createTestRun(request);
+      const run = this.ctrl.createTestRun(request);
       // map of file uris to statements on each line:
       const coveredLines = new Map<
         /* file uri */ string,
@@ -58,7 +74,7 @@ export class BazelTestingProvider {
             queue.push({ test, data });
           } else {
             if (data instanceof TestFile && !data.didResolve) {
-              await data.updateFromDisk(ctrl, test);
+              await data.updateFromDisk(this.ctrl, test);
             }
 
             await discoverTests(this.gatherTestItems(test.children));
@@ -125,20 +141,20 @@ export class BazelTestingProvider {
         },
       };
 
-      discoverTests(request.include ?? this.gatherTestItems(ctrl.items)).then(
-        runTestQueue,
-      );
+      discoverTests(
+        request.include ?? this.gatherTestItems(this.ctrl.items),
+      ).then(runTestQueue);
     };
 
-    ctrl.refreshHandler = async () => {
+    this.ctrl.refreshHandler = async () => {
       await Promise.all(
         this.getWorkspaceTestPatterns().map(({ pattern }) =>
-          this.findInitialFiles(ctrl, pattern),
+          this.findInitialFiles(this.ctrl, pattern),
         ),
       );
     };
 
-    ctrl.createRunProfile(
+    this.ctrl.createRunProfile(
       "Run Bazel Tests",
       vscode.TestRunProfileKind.Run,
       runHandler,
@@ -147,7 +163,7 @@ export class BazelTestingProvider {
       true,
     );
 
-    ctrl.createRunProfile(
+    this.ctrl.createRunProfile(
       "Debug Bazel Tests",
       vscode.TestRunProfileKind.Debug,
       runHandler,
@@ -156,17 +172,17 @@ export class BazelTestingProvider {
       true,
     );
 
-    ctrl.resolveHandler = async (item) => {
+    this.ctrl.resolveHandler = async (item) => {
       if (!item) {
-        context.subscriptions.push(
-          ...this.startWatchingWorkspace(ctrl, fileChangedEmitter),
+        this.context.subscriptions.push(
+          ...this.startWatchingWorkspace(this.ctrl, fileChangedEmitter),
         );
         return;
       }
 
       const data = testData.get(item);
       if (data instanceof TestFile) {
-        await data.updateFromDisk(ctrl, item);
+        await data.updateFromDisk(this.ctrl, item);
       }
     };
 
@@ -179,15 +195,15 @@ export class BazelTestingProvider {
         return;
       }
 
-      const { file, data } = this.getOrCreateFile(ctrl, e.uri);
-      data.updateFromContents(ctrl, e.getText(), file);
+      const { file, data } = this.getOrCreateFile(this.ctrl, e.uri);
+      data.updateFromContents(this.ctrl, e.getText(), file); // TODO: here is how to a add a file to the tree
     }
 
     for (const document of vscode.workspace.textDocuments) {
       updateNodeForDocument(document);
     }
 
-    context.subscriptions.push(
+    this.context.subscriptions.push(
       vscode.workspace.onDidOpenTextDocument(updateNodeForDocument),
       vscode.workspace.onDidChangeTextDocument((e) =>
         updateNodeForDocument(e.document),
