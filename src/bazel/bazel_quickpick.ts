@@ -25,7 +25,8 @@ import { BazelWorkspaceInfo } from "./bazel_workspace_info";
  * registered bazel commands.
  */
 export class BazelTargetQuickPick
-  implements IBazelCommandAdapter, vscode.QuickPickItem {
+  implements IBazelCommandAdapter, vscode.QuickPickItem
+{
   /** The fully qualified bazel target label. */
   private readonly targetLabel: string;
 
@@ -93,7 +94,7 @@ async function queryWorkspaceQuickPickTargets(
  * returns the resulting array of BazelTargetQuickPick as a promise.
  * @param workspace The bazel workspace to run the bazel command from.
  */
-async function queryWorkspaceQuickPickPackages(
+async function queryWorkspaceQuickPickPackages( // TODO: this is how we get packages
   workspaceInfo: BazelWorkspaceInfo,
 ): Promise<BazelTargetQuickPick[]> {
   const packagePaths = await new BazelQuery(

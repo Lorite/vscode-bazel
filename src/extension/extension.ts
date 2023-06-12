@@ -336,7 +336,7 @@ async function bazelTestTarget(adapter: IBazelCommandAdapter | undefined) {
     // invoked via the command palatte. Provide quickpick test targets for
     // the user to choose from.
     const quickPick = await vscode.window.showQuickPick(
-      queryQuickPickTargets("kind('.*_test rule', ...)"),
+      queryQuickPickTargets("kind('.*_test rule', ...)"), // TODO: this is how we get test targets. Use this!!!!!!
       {
         canPickMany: false,
       },
