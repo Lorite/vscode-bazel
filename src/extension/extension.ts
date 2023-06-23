@@ -53,10 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
   const codeLensProvider = new BazelBuildCodeLensProvider(context);
   const buildifierDiagnostics = new BuildifierDiagnosticsManager();
   const completionItemProvider = new BazelCompletionItemProvider();
-  const bazelTestingProvider = new BazelTestingProvider(
-    context,
-    workspaceTreeProvider,
-  );
+  const bazelTestingProvider = new BazelTestingProvider(context);
 
   // tslint:disable-next-line:no-floating-promises
   completionItemProvider.refresh();
@@ -331,6 +328,7 @@ async function bazelRunTarget(adapter: IBazelCommandAdapter | undefined) {
  *     which the command's arguments will be determined.
  */
 async function bazelTestTarget(adapter: IBazelCommandAdapter | undefined) {
+  // TOOD: remove They key is here
   if (adapter === undefined) {
     // If the command adapter was unspecified, it means this command is being
     // invoked via the command palatte. Provide quickpick test targets for
@@ -480,7 +478,7 @@ async function bazelCopyTargetToClipboard(
  *         }
  *     ]
  */
-async function bazelGetTargetOutput(
+export async function bazelGetTargetOutput(
   target: string,
   options: string[] = [],
 ): Promise<string> {

@@ -99,26 +99,6 @@ export class BazelWorkspaceTreeProvider
     return Promise.resolve([]);
   }
 
-  public getChildrenTests(
-    element?: IBazelTreeItem,
-  ): Thenable<IBazelTreeItem[]> {
-    return this.getChildren(element).then(function (items) {
-      var promises = items.map(function (item) {
-        return item.getChildren().then(function (children) {
-          var promises2 = children.map(function (child) {
-            if (child.getContextValue() === "testRule") {
-              return child;
-            }
-          });
-          return Promise.resolve(promises2);
-        });
-      });
-      const promises123 = [].concat.apply([], promises); // flatten the array
-      const promises1234 = promises123.filter((item) => item !== undefined);
-      return Promise.resolve(promises1234); // remove undefined and then flatten the array
-    });
-  }
-
   public getTreeItem(element: IBazelTreeItem): vscode.TreeItem {
     const label = element.getLabel();
     const collapsibleState = element.mightHaveChildren()

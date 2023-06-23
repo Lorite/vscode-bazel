@@ -6,19 +6,15 @@ import {
   testData,
   TestFile,
 } from "./testTree";
-import { BazelWorkspaceTreeProvider } from "../workspace-tree";
+import { queryQuickPickTargets } from "../bazel";
+import { bazelGetTargetOutput } from "../extension/extension";
 
 export class BazelTestingProvider {
   private context: vscode.ExtensionContext;
-  private workspaceTree: BazelWorkspaceTreeProvider;
   private ctrl: vscode.TestController;
 
-  constructor(
-    private context_: vscode.ExtensionContext,
-    private workspaceTree_: BazelWorkspaceTreeProvider,
-  ) {
+  constructor(private context_: vscode.ExtensionContext) {
     this.context = context_;
-    this.workspaceTree = workspaceTree_;
     this.ctrl = vscode.tests.createTestController(
       "bazelTestExplorer",
       "Bazel Tests",
@@ -27,9 +23,7 @@ export class BazelTestingProvider {
   }
 
   public async activate() {
-    this.workspaceTree.getChildrenTests().then((tests) => {
-      console.log("tests", tests);
-    });
+    // TODO: test stuff here
 
     const fileChangedEmitter = new vscode.EventEmitter<vscode.Uri>();
     const runHandler = (
@@ -149,7 +143,7 @@ export class BazelTestingProvider {
     this.ctrl.refreshHandler = async () => {
       await Promise.all(
         this.getWorkspaceTestPatterns().map(({ pattern }) =>
-          this.findInitialFiles(this.ctrl, pattern),
+          this.findInitialFiles(this.ctrl),
         ),
       );
     };
@@ -251,12 +245,23 @@ export class BazelTestingProvider {
     }));
   }
 
-  protected async findInitialFiles(
-    controller: vscode.TestController,
-    pattern: vscode.GlobPattern,
-  ) {
-    for (const file of await vscode.workspace.findFiles(pattern)) {
-      this.getOrCreateFile(controller, file);
+  protected async findInitialFiles(controller: vscode.TestController) {
+    // TODO: write code here
+    for (const target of await queryQuickPickTargets(
+      "kind('.*_test rule', ...)",
+    )) {
+      console.log(target);
+      console.log(target.label);
+      const commandOptions = target.getBazelCommandOptions();
+      console.log(commandOptions.targets[0]);
+      console.log(commandOptions.options);
+
+      let target_output = await bazelGetTargetOutput(
+        commandOptions.targets[0],
+        commandOptions.options,
+      );
+      console.log(target_output);
+      this.getOrCreateFile(controller, vscode.Uri.file(target_output));
     }
   }
 
@@ -281,7 +286,7 @@ export class BazelTestingProvider {
         });
         watcher.onDidDelete((uri) => controller.items.delete(uri.toString()));
 
-        this.findInitialFiles(controller, pattern);
+        this.findInitialFiles(controller);
 
         return watcher;
       },

@@ -94,7 +94,7 @@ async function queryWorkspaceQuickPickTargets(
  * returns the resulting array of BazelTargetQuickPick as a promise.
  * @param workspace The bazel workspace to run the bazel command from.
  */
-async function queryWorkspaceQuickPickPackages( // TODO: this is how we get packages
+async function queryWorkspaceQuickPickPackages(
   workspaceInfo: BazelWorkspaceInfo,
 ): Promise<BazelTargetQuickPick[]> {
   const packagePaths = await new BazelQuery(
